@@ -1,0 +1,8 @@
+pyCover attempts to download and add the missing artwork from your songs
+in your iTunes library.
+
+REQUIREMENTS
+	This program requires BeautifulSoup and pywin32
+
+	BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
+	pywin32: http://sourceforge.net/projects/pywin32/
