@@ -8,6 +8,7 @@ class CoverDownload():
         self.album = album.encode("utf-8")
         search = self.artist.replace(' ', '+') + '+' + self.album.replace(' ','+')
         self.searchPage = "http://www.amazon.com/s/ref=nb_ss_m?url=search-alias%3Dpopular&field-keywords=" + search + "&x=0&y=0"
+        self.covers = []
 
     def getCovers(self,top = 4):
         """
@@ -45,3 +46,11 @@ class CoverDownload():
 
         self.covers = covers
         return covers
+    
+    def saveCoversToFile(self):
+        i = 0
+        for cover in self.covers:
+            fp = open("{0} - {1} - {2}.jpg".format(self.artist,self.album,i), "wb")
+            fp.write(cover)
+            fp.close()
+            i += 1
