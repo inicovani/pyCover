@@ -4,38 +4,8 @@ from PyQt4.QtGui import *
 #from PyQt4.QtCore import *
 from PyQt4 import QtCore
 from PyQt4.Qt import *
-import win32com.client
-
-class LoadLibrary(QtCore.QThread):
-    def __init__(self):
-        QtCore.QThread.__init__(self)
-        self.htArtists = {}
-        self.htAlbums = {}
-
-    def run(self):
-        import pythoncom
-        pythoncom.CoInitialize()
-        iTunes = win32com.client.gencache.EnsureDispatch("iTunes.Application")
-        tracks = iTunes.LibraryPlaylist.Tracks
-
-        self.emit(QtCore.SIGNAL("setMaxTracks"), tracks.Count)
-        for song in tracks:
-            if song.Artist not in self.htArtists:        
-                self.htArtists[song.Artist] = [song.Album]
-            elif song.Album not in self.htArtists[song.Artist]:
-                self.htArtists[song.Artist].append(song.Album)
-
-            if song.Album not in self.htAlbums:
-                self.htAlbums[song.Album] = [False]
-                if song.Artwork.Count >= 1:
-                    self.htAlbums[song.Album].append(song.Artwork[0])
-                else:
-                    self.emit(QtCore.SIGNAL("newMissingArtworkAlbum"), song.Artist, song.Album)
-                    self.htAlbums[song.Album].append(None)
-
-            self.htAlbums[song.Album].append(song)
-            self.emit(QtCore.SIGNAL("tick"))
-
+from loadiTunesLibrary import LoadiTunesLibrary
+from pyCover_QListWidgetItem import pyCover_QListWidgetItem
 
 class MainWindow(QMainWindow):
     def __init__(self, *args):
@@ -45,7 +15,7 @@ class MainWindow(QMainWindow):
         self.mainLayout = QGridLayout(self.mainWidget)
         self.setWindowTitle("pyCover")
 
-        self.loadLibrary = LoadLibrary()
+        self.loadLibraryThread = LoadiTunesLibrary()
 
         self.PD_Progress = QProgressDialog("Loading iTunes Library","Cancel",0,0,self.mainWidget)
         self.PD_Progress.setWindowTitle("Loading...")
@@ -76,13 +46,13 @@ class MainWindow(QMainWindow):
         self.mainLayout.addWidget( self.GB_Options,0,1 )
         self.mainLayout.addWidget( self.List_Artwork,1,0,1,2 )
 
-        QtCore.QObject.connect(self.loadLibrary, QtCore.SIGNAL("setMaxTracks"), self.progressDialogSetup)
-        QtCore.QObject.connect(self.loadLibrary, QtCore.SIGNAL("tick"), self.updateProgressDialog)
-        QtCore.QObject.connect(self.loadLibrary, QtCore.SIGNAL("newMissingArtworkAlbum"), self.insertAlbum)
+        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("setMaxTracks"), self.progressDialogSetup)
+        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("tick"), self.updateProgressDialog)
+        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("newMissingArtworkAlbum"), self.insertAlbum)
 
     def loadLibrary(self):
         self.PD_Progress.show()
-        self.loadLibrary.start()
+        self.loadLibraryThread.start()
 
     def progressDialogSetup(self, maximum):
         self.PD_Progress.setMaximum(maximum)
@@ -94,23 +64,6 @@ class MainWindow(QMainWindow):
     def insertAlbum(self,artist, album):
         newItem = pyCover_QListWidgetItem(artist, album)
         self.List_Albums.addItem(newItem)
-
-
-class pyCover_QListWidgetItem(QListWidgetItem):
-    """
-    We inherit from QListWidgetItem so we can add it to a List
-    and still keep information about the artist and album.
-    """
-    def __init__(self, artist, album):
-        QListWidgetItem.__init__(self,QIcon(QPixmap('resources/icon_unknown_cover_100.png')),"{0} - {1}".format(artist.encode("utf-8"), album.encode("utf-8")))
-        self.artist = artist
-        self.album = album
-
-    def getArtist(self):
-        return self.artist
-
-    def getAlbum(self):
-        return self.album
 
 if __name__ == "__main__":
     import sys
