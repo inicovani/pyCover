@@ -1,0 +1,10 @@
+<RCC>
+  <qresource prefix="icon_no_cover" >
+    <file>icon_no_cover_100.png</file>
+    <file>icon_no_cover_200.png</file>
+  </qresource>
+  <qresource prefix="icon_unknown_cover" >
+    <file>icon_unknown_cover_200.png</file>
+    <file>icon_unknown_cover_100.png</file>
+  </qresource>
+</RCC>
