@@ -1,17 +1,20 @@
 from PyQt4 import QtCore
 import win32com.client
+import pythoncom
 
 class LoadiTunesLibrary(QtCore.QThread):
-    def __init__(self):
-        QtCore.QThread.__init__(self)
+    def __init__(self, parent):
+        QtCore.QThread.__init__(self, parent)
         self.htArtists = {}
         self.htAlbums = {}
 
     def run(self):
-        import pythoncom
         pythoncom.CoInitialize()
-        iTunes = win32com.client.gencache.EnsureDispatch("iTunes.Application")
-        tracks = iTunes.LibraryPlaylist.Tracks
+        #self.iTunes = win32com.client.gencache.EnsureDispatch("iTunes.Application")
+        #self.iTunes = win32com.client.Dispatch("iTunes.Application")
+        #self.emit(QtCore.SIGNAL("saveiTunesRef"),self.iTunes)
+        self.iTunes = win32com.client.gencache.EnsureDispatch("iTunes.Application")
+        tracks = self.iTunes.LibraryPlaylist.Tracks
 
         self.emit(QtCore.SIGNAL("setMaxTracks"), tracks.Count)
         for song in tracks:
@@ -28,6 +31,8 @@ class LoadiTunesLibrary(QtCore.QThread):
                     self.emit(QtCore.SIGNAL("newMissingArtworkAlbum"), song.Artist, song.Album)
                     self.htAlbums[song.Album].append(None)
 
-            self.htAlbums[song.Album].append(song)
+            trackData = [song.TrackNumber, song.Name]
+            self.htAlbums[song.Album].append(trackData)
             self.emit(QtCore.SIGNAL("tick"))
-
+        
+        self.emit(QtCore.SIGNAL("doneLibraryLoad"),self.htAlbums)
