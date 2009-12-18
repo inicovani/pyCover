@@ -1,8 +1,16 @@
 pyCover attempts to download and add the missing artwork from your songs
 in your iTunes library.
 
-REQUIREMENTS
-	This program requires BeautifulSoup and pywin32
+When you run pyCover it will try to open iTunes, and start searching your
+library for albums with missing covers. You can then select any of these
+albums, click on the "Download covers" button, and pyCover will search
+and download the required cover, so you can automatically save it to
+your album.
 
-	BeautifulSoup: http://www.crummy.com/software/BeautifulSoup/
-	pywin32: http://sourceforge.net/projects/pywin32/
+REQUIREMENTS
+	This program requires Python 2.6, BeautifulSoup, pywin32 and PyQt4
+
+	Python 2.6.4: http://www.python.org
+	BeautifulSoup-3.0.8: http://www.crummy.com/software/BeautifulSoup/
+	pywin32-214: http://sourceforge.net/projects/pywin32/
+	PyQt 4.6.2-2: http://www.riverbankcomputing.co.uk
