@@ -43,6 +43,7 @@ class MainWindow(QMainWindow):
         T_TrackList.setRootIsDecorated(False)
         T_TrackList.headerItem().setText(0, "N.")
         T_TrackList.headerItem().setText(1, "Track Name")
+        T_TrackList.header().setDefaultSectionSize(35)
         Btn_DownloadCover = QPushButton("Download cover",self.GB_Options)
         Btn_SaveCoverToAlbum = QPushButton("Save selected cover",self.GB_Options)
 
@@ -63,9 +64,9 @@ class MainWindow(QMainWindow):
         self.List_Artwork.setIconSize(QSize(150,150))
         self.List_Artwork.setMovement(QListView.Static)
         # Posible feature, drop an image file as a cover for the album
-        self.List_Artwork.setDragDropMode(QtGui.QAbstractItemView.NoDragDrop)
+        self.List_Artwork.setDragDropMode(QAbstractItemView.NoDragDrop)
 
-        self.List_Artwork.setCurrentRow(0)
+        
         self.mainLayout.addWidget( self.List_Albums,0,0 )
         self.mainLayout.addWidget( self.GB_Options,0,1 )
         self.mainLayout.addWidget( self.List_Artwork,1,0,1,2 )
@@ -74,7 +75,6 @@ class MainWindow(QMainWindow):
         QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("tick"), self.updateProgressDialog)
         QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("doneLibraryLoad"), self.doneLibraryLoad)
         QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("newMissingArtworkAlbum"), self.insertAlbum)
-        QtCore.QObject.connect(self.List_Albums, QtCore.SIGNAL("currentItemChanged(QListWidgetItem*,QListWidgetItem*)"), self.handleAlbumSelection)
 
     def loadLibrary(self):
         self.PD_Progress.show()
@@ -82,6 +82,10 @@ class MainWindow(QMainWindow):
 
     def doneLibraryLoad(self, htAlbums):
         self.htAlbums = htAlbums
+        QtCore.QObject.connect(self.List_Albums, QtCore.SIGNAL("currentItemChanged(QListWidgetItem*,QListWidgetItem*)"), self.handleAlbumSelection)
+        self.List_Albums.setCurrentRow(1)
+        self.List_Albums.setCurrentRow(0)
+
 
     def progressDialogSetup(self, maximum):
         self.PD_Progress.setMaximum(maximum)
