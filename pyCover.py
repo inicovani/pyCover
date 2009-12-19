@@ -6,6 +6,7 @@ from PyQt4 import QtCore
 from PyQt4.Qt import *
 from loadiTunesLibrary import LoadiTunesLibrary
 from pyCover_QListWidgetItem import pyCover_QListWidgetItem
+from coverDownload import CoverDownload
 import win32com.client
 import pythoncom
 
@@ -44,8 +45,11 @@ class MainWindow(QMainWindow):
         T_TrackList.headerItem().setText(0, "N.")
         T_TrackList.headerItem().setText(1, "Track Name")
         T_TrackList.header().setDefaultSectionSize(35)
-        Btn_DownloadCover = QPushButton("Download cover",self.GB_Options)
-        Btn_SaveCoverToAlbum = QPushButton("Save selected cover",self.GB_Options)
+        Btn_DownloadCover = QPushButton("&Download cover",self.GB_Options)
+        Btn_DownloadCover.setObjectName("Btn_DownloadCover")
+        Btn_SaveCoverToAlbum = QPushButton("&Save selected cover",self.GB_Options)
+        Btn_SaveCoverToAlbum.setObjectName("Btn_SaveCoverToAlbum")
+        Btn_SaveCoverToAlbum.setVisible(False)
 
         gl.addWidget(Lbl_Artist)
         gl.addWidget(Lbl_Album)
@@ -56,13 +60,16 @@ class MainWindow(QMainWindow):
         self.GB_Options.setVisible(False)
 
         self.List_Artwork = QListWidget(self.mainWidget)
-        self.List_Artwork.setMinimumHeight(180)
-        self.List_Artwork.setMaximumHeight(180)
+        self.List_Artwork.setMinimumHeight(200)
+        self.List_Artwork.setMaximumHeight(200)
         self.List_Artwork.setSpacing(5)
         self.List_Artwork.setFlow(QListView.LeftToRight)
         self.List_Artwork.setViewMode(QListView.IconMode)
         self.List_Artwork.setIconSize(QSize(150,150))
         self.List_Artwork.setMovement(QListView.Static)
+        self.List_Artwork.setVerticalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOff)
+        self.List_Artwork.setHorizontalScrollBarPolicy(QtCore.Qt.ScrollBarAlwaysOn)
+        self.List_Artwork.setProperty("isWrapping", False)
         # Posible feature, drop an image file as a cover for the album
         self.List_Artwork.setDragDropMode(QAbstractItemView.NoDragDrop)
 
@@ -75,6 +82,7 @@ class MainWindow(QMainWindow):
         QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("tick"), self.updateProgressDialog)
         QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("doneLibraryLoad"), self.doneLibraryLoad)
         QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("newMissingArtworkAlbum"), self.insertAlbum)
+        QtCore.QObject.connect(Btn_DownloadCover, QtCore.SIGNAL("clicked()"), self.handleDownloadCoverClick)
 
     def loadLibrary(self):
         self.PD_Progress.show()
@@ -83,9 +91,7 @@ class MainWindow(QMainWindow):
     def doneLibraryLoad(self, htAlbums):
         self.htAlbums = htAlbums
         QtCore.QObject.connect(self.List_Albums, QtCore.SIGNAL("currentItemChanged(QListWidgetItem*,QListWidgetItem*)"), self.handleAlbumSelection)
-        self.List_Albums.setCurrentRow(1)
         self.List_Albums.setCurrentRow(0)
-
 
     def progressDialogSetup(self, maximum):
         self.PD_Progress.setMaximum(maximum)
@@ -100,7 +106,22 @@ class MainWindow(QMainWindow):
 
     def handleAlbumSelection(self, itemSelected, previousItemSelected):
         itemSelected.showArtwork(self.List_Artwork)
-        itemSelected.showInformation(self.GB_Options, self.htAlbums[itemSelected.getAlbum()])
+        itemSelected.showInformation(self.GB_Options, self.htAlbums[itemSelected.album])
+
+    def handleDownloadCoverClick(self):
+        selectedItem = self.List_Albums.selectedItems()[0]
+        self.cd = CoverDownload(selectedItem.getArtist(), selectedItem.getAlbum())
+        QtCore.QObject.connect(self.cd, QtCore.SIGNAL("doneCoverDownload()"), self.handleDoneCoverDownload)
+        QtCore.QObject.connect(self.cd, QtCore.SIGNAL("coverDownloaded(PyQt_PyObject)"), self.handleCoverDownloaded)
+        self.cd.getCovers()
+
+    def handleDoneCoverDownload(self):
+        selectedItem = self.List_Albums.selectedItems()[0]
+        selectedItem.setCovers(self.cd.covers)
+
+    def handleCoverDownloaded(self,cover):
+        selectedItem = self.List_Albums.selectedItems()[0]
+        selectedItem.appendCover(self.List_Artwork,cover)
 
 if __name__ == "__main__":
     import sys

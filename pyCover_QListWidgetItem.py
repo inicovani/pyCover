@@ -13,22 +13,31 @@ class pyCover_QListWidgetItem(QListWidgetItem):
         self.artist = artist
         self.album = album
         self.covers = []
-        self.coverDownloaded = False
+        self.coversDownloaded = False
 
     def getArtist(self):
-        return self.artist
+        return self.artist.encode("utf-8")
 
     def getAlbum(self):
-        return self.album
+        return self.album.encode("utf-8")
 
     def showArtwork(self, artworkList):
         artworkList.clear()
         artworkList.addItem(QListWidgetItem(QIcon(QPixmap('resources/icon_no_cover_150.png')),'(No Cover)'))
+        for cover in self.covers:
+            pm = QPixmap()
+            pm.loadFromData(cover)
+            artworkList.addItem(QListWidgetItem(QIcon(pm),''))
+
+    def appendCover(self, artworkList, cover):
+        pm = QPixmap()
+        pm.loadFromData(cover)
+        artworkList.addItem(QListWidgetItem(QIcon(pm),''))
 
     def showInformation(self, infoBox, albumTrackList):
         infoBox.setVisible(True)
-        infoBox.findChild(QLabel,"Lbl_Artist").setText("Artist: {0}".format(self.artist))
-        infoBox.findChild(QLabel,"Lbl_Album").setText("Album: {0}".format(self.album))
+        infoBox.findChild(QLabel,"Lbl_Artist").setText("Artist: {0}".format(self.getArtist()))
+        infoBox.findChild(QLabel,"Lbl_Album").setText("Album: {0}".format(self.getAlbum()))
         trackListBox = infoBox.findChild(QTreeWidget,"T_TrackList")
         trackListBox.clear()
         albumTrackList2 = albumTrackList[2:]
@@ -40,4 +49,6 @@ class pyCover_QListWidgetItem(QListWidgetItem):
             trackListBox.topLevelItem(i).setText(1, track[1]) # Track Name
             i += 1
 
-
+    def setCovers(self, covers):
+        self.coversDownloaded = True
+        self.covers = covers

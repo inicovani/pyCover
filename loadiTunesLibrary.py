@@ -31,7 +31,11 @@ class LoadiTunesLibrary(QtCore.QThread):
                     self.emit(QtCore.SIGNAL("newMissingArtworkAlbum"), song.Artist, song.Album)
                     self.htAlbums[song.Album].append(None)
 
-            trackData = [song.TrackNumber, song.Name]
+            trackData = [song.TrackNumber, song.Name, \
+                self.iTunes.ITObjectPersistentIDHigh(song), \
+                self.iTunes.ITObjectPersistentIDLow(song)]
+
+            #idedTrack = tracks.ItemByPersistentID(trackData[2],trackData[3])
             self.htAlbums[song.Album].append(trackData)
             self.emit(QtCore.SIGNAL("tick"))
         
