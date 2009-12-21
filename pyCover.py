@@ -18,19 +18,30 @@ class MainWindow(QMainWindow):
         self.mainLayout = QGridLayout(self.mainWidget)
         self.setWindowTitle("pyCover")
 
+        icon = QIcon()
+        icon.addPixmap(QPixmap("resources/pyCover_ico32.png"), QIcon.Normal, QIcon.Off)
+        self.setWindowIcon(icon)
+
         self.loadLibraryThread = LoadiTunesLibrary(self)
 
         self.PD_Progress = QProgressDialog("Loading iTunes Library","Cancel",0,0,self.mainWidget)
         self.PD_Progress.setWindowTitle("Loading...")
         self.PD_Progress.setWindowModality(Qt.ApplicationModal)
 
-        self.List_Albums = QListWidget(self.mainWidget)
-        self.List_Albums.setMinimumHeight(300)
-        self.List_Albums.setMinimumWidth(400)
+        self.GB_AlbumList = QGroupBox("Albums with missing covers", self.mainWidget)
+        self.GB_AlbumList.setMinimumWidth(400)
+        self.GB_AlbumList.setMinimumHeight(300)
+        gl = QVBoxLayout(self.GB_AlbumList)
+        
+        self.List_Albums = QListWidget(self.GB_AlbumList)
         self.List_Albums.setIconSize(QSize(100,100))
         self.List_Albums.setSpacing(2)
         self.List_Albums.setSortingEnabled(True)
 
+        gl.addWidget(self.List_Albums)
+        self.GB_AlbumList.setLayout(gl)
+
+#        self.GB_AlbumList.setLayout(self.List_Albums)
         self.GB_Options = QGroupBox("Information", self.mainWidget)
         self.GB_Options.setMinimumWidth(250)
 
@@ -74,7 +85,7 @@ class MainWindow(QMainWindow):
         self.List_Artwork.setDragDropMode(QAbstractItemView.NoDragDrop)
 
         
-        self.mainLayout.addWidget( self.List_Albums,0,0 )
+        self.mainLayout.addWidget( self.GB_AlbumList,0,0 )
         self.mainLayout.addWidget( self.GB_Options,0,1 )
         self.mainLayout.addWidget( self.List_Artwork,1,0,1,2 )
 
@@ -85,6 +96,9 @@ class MainWindow(QMainWindow):
         QtCore.QObject.connect(Btn_DownloadCover, QtCore.SIGNAL("clicked()"), self.handleDownloadCoverClick)
 
     def loadLibrary(self):
+        """
+        Shows the progress dialog, and starts the library loading thread.
+        """
         self.PD_Progress.show()
         self.loadLibraryThread.start()
 
@@ -107,6 +121,12 @@ class MainWindow(QMainWindow):
     def handleAlbumSelection(self, itemSelected, previousItemSelected):
         itemSelected.showArtwork(self.List_Artwork)
         itemSelected.showInformation(self.GB_Options, self.htAlbums[itemSelected.album])
+
+        # If covers are already downloaded, no need to download them again
+        if itemSelected.coversDownloaded:
+            self.GB_Options.findChild(QPushButton,"Btn_DownloadCover").setDisabled(True)
+        else:
+            self.GB_Options.findChild(QPushButton,"Btn_DownloadCover").setDisabled(False)
 
     def handleDownloadCoverClick(self):
         selectedItem = self.List_Albums.selectedItems()[0]
