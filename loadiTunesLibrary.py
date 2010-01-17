@@ -13,10 +13,10 @@ class LoadiTunesLibrary(QtCore.QThread):
         #self.iTunes = win32com.client.gencache.EnsureDispatch("iTunes.Application")
         #self.iTunes = win32com.client.Dispatch("iTunes.Application")
         #self.emit(QtCore.SIGNAL("saveiTunesRef"),self.iTunes)
-        self.iTunes = win32com.client.gencache.EnsureDispatch("iTunes.Application")
-        tracks = self.iTunes.LibraryPlaylist.Tracks
+        iTunes = win32com.client.gencache.EnsureDispatch("iTunes.Application")
+        tracks = iTunes.LibraryPlaylist.Tracks
 
-        self.emit(QtCore.SIGNAL("setMaxTracks"), tracks.Count)
+        self.emit(QtCore.SIGNAL("setMaxTracks(PyQt_PyObject)"), tracks.Count)
         for song in tracks:
             if song.Artist not in self.htArtists:        
                 self.htArtists[song.Artist] = [song.Album]
@@ -32,8 +32,8 @@ class LoadiTunesLibrary(QtCore.QThread):
                     self.htAlbums[song.Album].append(None)
 
             trackData = [song.TrackNumber, song.Name, \
-                self.iTunes.ITObjectPersistentIDHigh(song), \
-                self.iTunes.ITObjectPersistentIDLow(song)]
+                iTunes.ITObjectPersistentIDHigh(song), \
+                iTunes.ITObjectPersistentIDLow(song)]
 
             #idedTrack = tracks.ItemByPersistentID(trackData[2],trackData[3])
             self.htAlbums[song.Album].append(trackData)

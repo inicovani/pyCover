@@ -9,6 +9,7 @@ from pyCover_QListWidgetItem import pyCover_QListWidgetItem
 from coverDownload import CoverDownload
 import win32com.client
 import pythoncom
+import os
 
 class MainWindow(QMainWindow):
     def __init__(self, *args):
@@ -29,7 +30,7 @@ class MainWindow(QMainWindow):
         self.PD_Progress.setWindowModality(Qt.ApplicationModal)
 
         self.GB_AlbumList = QGroupBox("Albums with missing covers", self.mainWidget)
-        self.GB_AlbumList.setMinimumWidth(400)
+        self.GB_AlbumList.setMinimumWidth(450)
         self.GB_AlbumList.setMinimumHeight(300)
         gl = QVBoxLayout(self.GB_AlbumList)
         
@@ -38,10 +39,96 @@ class MainWindow(QMainWindow):
         self.List_Albums.setSpacing(2)
         self.List_Albums.setSortingEnabled(True)
 
+        palette = QPalette()
+        brush = QBrush(QColor(255, 255, 255))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.WindowText, brush)
+        palette.setBrush(QPalette.Active, QPalette.Button, brush)
+        palette.setBrush(QPalette.Active, QPalette.Light, brush)
+        palette.setBrush(QPalette.Active, QPalette.Text, brush)
+        palette.setBrush(QPalette.Active, QPalette.Shadow, brush)
+        palette.setBrush(QPalette.Active, QPalette.ToolTipText, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.WindowText, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.Button, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.Light, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.Text, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.ButtonText, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.Shadow, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.ToolTipText, brush)
+        palette.setBrush(QPalette.Disabled, QPalette.Button, brush)
+        palette.setBrush(QPalette.Disabled, QPalette.Light, brush)
+        palette.setBrush(QPalette.Disabled, QPalette.Shadow, brush)
+        palette.setBrush(QPalette.Disabled, QPalette.ToolTipText, brush)
+
+        brush = QBrush(QColor(234, 229, 220))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.Midlight, brush)
+        brush = QBrush(QColor(128, 128, 128))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.Dark, brush)
+        brush = QBrush(QColor(141, 139, 133))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.Mid, brush)
+        brush = QBrush(QColor(108, 104, 152))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.Window, brush)
+
+        brush = QBrush(QColor(0, 0, 0))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Active, QPalette.AlternateBase, brush)
+        palette.setBrush(QPalette.Active, QPalette.ButtonText, brush)
+        palette.setBrush(QPalette.Active, QPalette.Base, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.Base, brush)
+        palette.setBrush(QPalette.Inactive, QPalette.AlternateBase, brush)
+        palette.setBrush(QPalette.Disabled, QPalette.AlternateBase, brush)
+
+        brush = QBrush(QColor(234, 229, 220))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Inactive, QPalette.Midlight, brush)
+        brush = QBrush(QColor(128, 128, 128))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Inactive, QPalette.Dark, brush)
+        brush = QBrush(QColor(141, 139, 133))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Inactive, QPalette.Mid, brush)
+        brush = QBrush(QColor(108, 104, 152))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Inactive, QPalette.Window, brush)
+        brush = QBrush(QColor(128, 128, 128))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Disabled, QPalette.WindowText, brush)
+        brush = QBrush(QColor(234, 229, 220))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Disabled, QPalette.Midlight, brush)
+        brush = QBrush(QColor(128, 128, 128))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Disabled, QPalette.Dark, brush)
+        brush = QBrush(QColor(141, 139, 133))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Disabled, QPalette.Mid, brush)
+        brush = QBrush(QColor(128, 128, 128))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Disabled, QPalette.Text, brush)
+        brush = QBrush(QColor(128, 128, 128))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Disabled, QPalette.ButtonText, brush)
+        brush = QBrush(QColor(108, 104, 152))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Disabled, QPalette.Base, brush)
+        brush = QBrush(QColor(108, 104, 152))
+        brush.setStyle(QtCore.Qt.SolidPattern)
+        palette.setBrush(QPalette.Disabled, QPalette.Window, brush)
+
+        font = QFont()
+        font.setWeight(75)
+        font.setBold(True)
+#        self.List_Albums.setPalette(palette)
+#        self.List_Albums.setFont(font)
+
+
         gl.addWidget(self.List_Albums)
         self.GB_AlbumList.setLayout(gl)
 
-#        self.GB_AlbumList.setLayout(self.List_Albums)
         self.GB_Options = QGroupBox("Information", self.mainWidget)
         self.GB_Options.setMinimumWidth(250)
 
@@ -83,17 +170,23 @@ class MainWindow(QMainWindow):
         self.List_Artwork.setProperty("isWrapping", False)
         # Posible feature, drop an image file as a cover for the album
         self.List_Artwork.setDragDropMode(QAbstractItemView.NoDragDrop)
+        self.List_Artwork.setVisible(False)
+
+        self.List_Artwork.setPalette(palette)
+        self.List_Artwork.setFont(font)
 
         
         self.mainLayout.addWidget( self.GB_AlbumList,0,0 )
         self.mainLayout.addWidget( self.GB_Options,0,1 )
         self.mainLayout.addWidget( self.List_Artwork,1,0,1,2 )
 
-        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("setMaxTracks"), self.progressDialogSetup)
+        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("setMaxTracks(PyQt_PyObject)"), self.progressDialogSetup)
         QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("tick"), self.updateProgressDialog)
         QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("doneLibraryLoad"), self.doneLibraryLoad)
         QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("newMissingArtworkAlbum"), self.insertAlbum)
         QtCore.QObject.connect(Btn_DownloadCover, QtCore.SIGNAL("clicked()"), self.handleDownloadCoverClick)
+        QtCore.QObject.connect(Btn_SaveCoverToAlbum, QtCore.SIGNAL("clicked()"), self.handleSaveCoverClick)
+        QtCore.QObject.connect(self.List_Artwork, QtCore.SIGNAL("currentItemChanged(QListWidgetItem*,QListWidgetItem*)"), self.handleCoverSelection)
 
     def loadLibrary(self):
         """
@@ -119,29 +212,76 @@ class MainWindow(QMainWindow):
         self.List_Albums.addItem(newItem)
 
     def handleAlbumSelection(self, itemSelected, previousItemSelected):
+        self.List_Artwork.setVisible(True)
         itemSelected.showArtwork(self.List_Artwork)
         itemSelected.showInformation(self.GB_Options, self.htAlbums[itemSelected.album])
 
         # If covers are already downloaded, no need to download them again
         if itemSelected.coversDownloaded:
             self.GB_Options.findChild(QPushButton,"Btn_DownloadCover").setDisabled(True)
+            self.GB_Options.findChild(QPushButton,"Btn_SaveCoverToAlbum").setDisabled(False)
+            self.GB_Options.findChild(QPushButton,"Btn_SaveCoverToAlbum").setVisible(True)
+
         else:
             self.GB_Options.findChild(QPushButton,"Btn_DownloadCover").setDisabled(False)
+            self.GB_Options.findChild(QPushButton,"Btn_SaveCoverToAlbum").setDisabled(True)
+            self.GB_Options.findChild(QPushButton,"Btn_SaveCoverToAlbum").setVisible(False)
+
+    def handleCoverSelection(self, itemSelected, previousItemSelected):
+        if self.List_Artwork.currentRow() > 0:
+            self.GB_Options.findChild(QPushButton,"Btn_SaveCoverToAlbum").setDisabled(False)
+        else:
+            self.GB_Options.findChild(QPushButton,"Btn_SaveCoverToAlbum").setDisabled(True)
 
     def handleDownloadCoverClick(self):
         selectedItem = self.List_Albums.selectedItems()[0]
         self.cd = CoverDownload(selectedItem.getArtist(), selectedItem.getAlbum())
         QtCore.QObject.connect(self.cd, QtCore.SIGNAL("doneCoverDownload()"), self.handleDoneCoverDownload)
         QtCore.QObject.connect(self.cd, QtCore.SIGNAL("coverDownloaded(PyQt_PyObject)"), self.handleCoverDownloaded)
+        self.progressDialogSetup(100)
+        self.PD_Progress.setLabelText("Downloading covers...")
+        self.PD_Progress.setWindowTitle("Please wait...")        
+        self.PD_Progress.show()
         self.cd.getCovers()
 
     def handleDoneCoverDownload(self):
+        self.GB_Options.findChild(QPushButton,"Btn_DownloadCover").setDisabled(True)
+        self.GB_Options.findChild(QPushButton,"Btn_SaveCoverToAlbum").setVisible(True)
+        self.PD_Progress.setValue(100)
         selectedItem = self.List_Albums.selectedItems()[0]
         selectedItem.setCovers(self.cd.covers)
 
     def handleCoverDownloaded(self,cover):
+        self.PD_Progress.setValue(self.PD_Progress.value() + 20)
         selectedItem = self.List_Albums.selectedItems()[0]
         selectedItem.appendCover(self.List_Artwork,cover)
+
+    def handleSaveCoverClick(self):
+        infoDialog = QMessageBox(QMessageBox.Information,"Information:",\
+            "Cover successfully saved to tracks.",QMessageBox.Ok,\
+            self.mainWidget)
+        currentAlbum = self.List_Albums.currentItem()
+        coverToSave = currentAlbum.covers[self.List_Artwork.currentRow()-1]
+        pixmap = QPixmap()
+        pixmap.loadFromData(coverToSave)
+
+        tempFileName = "pyCover_tempcover.jpg"
+        fp = open(tempFileName,"wb")
+        fp.write(coverToSave)
+        fp.flush()
+        os.fsync(fp.fileno())
+        fp.close()
+        
+        trackList = self.htAlbums[currentAlbum.album][2:]
+        iTunes = win32com.client.gencache.EnsureDispatch("iTunes.Application")
+
+        for track in trackList:
+            trackRef = iTunes.LibraryPlaylist.Tracks.ItemByPersistentID(track[2],track[3])
+            trackRef.AddArtworkFromFile(tempFileName)
+
+        currentAlbum.setIcon(QIcon(pixmap))
+
+        infoDialog.show()
 
 if __name__ == "__main__":
     import sys

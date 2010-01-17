@@ -33,6 +33,7 @@ class pyCover_QListWidgetItem(QListWidgetItem):
         pm = QPixmap()
         pm.loadFromData(cover)
         artworkList.addItem(QListWidgetItem(QIcon(pm),''))
+        self.covers.append(cover)
 
     def showInformation(self, infoBox, albumTrackList):
         infoBox.setVisible(True)
@@ -51,4 +52,4 @@ class pyCover_QListWidgetItem(QListWidgetItem):
 
     def setCovers(self, covers):
         self.coversDownloaded = True
-        self.covers = covers
+#        self.covers = covers
