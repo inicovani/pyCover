@@ -26,6 +26,7 @@ class MainWindow(QMainWindow):
         self.loadLibraryThread = LoadiTunesLibrary(self)
 
         self.PD_Progress = QProgressDialog("Loading iTunes Library","Cancel",0,0,self.mainWidget)
+        self.PD_Progress.setValue(0)
         self.PD_Progress.setWindowTitle("Loading...")
         self.PD_Progress.setWindowModality(Qt.ApplicationModal)
 
@@ -180,10 +181,10 @@ class MainWindow(QMainWindow):
         self.mainLayout.addWidget( self.GB_Options,0,1 )
         self.mainLayout.addWidget( self.List_Artwork,1,0,1,2 )
 
-        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("setMaxTracks(PyQt_PyObject)"), self.progressDialogSetup)
-        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("tick"), self.updateProgressDialog)
-        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("doneLibraryLoad"), self.doneLibraryLoad)
-        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("newMissingArtworkAlbum"), self.insertAlbum)
+        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("setMaxTracks(PyQt_PyObject)"), self.PD_Progress.setMaximum)
+        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("tick(PyQt_PyObject)"), self.updateProgressDialog)
+        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("doneLibraryLoad(PyQt_PyObject)"), self.doneLibraryLoad)
+        QtCore.QObject.connect(self.loadLibraryThread, QtCore.SIGNAL("newMissingArtworkAlbum(PyQt_PyObject,PyQt_PyObject)"), self.insertAlbum)
         QtCore.QObject.connect(Btn_DownloadCover, QtCore.SIGNAL("clicked()"), self.handleDownloadCoverClick)
         QtCore.QObject.connect(Btn_SaveCoverToAlbum, QtCore.SIGNAL("clicked()"), self.handleSaveCoverClick)
         QtCore.QObject.connect(self.List_Artwork, QtCore.SIGNAL("currentItemChanged(QListWidgetItem*,QListWidgetItem*)"), self.handleCoverSelection)
@@ -191,21 +192,33 @@ class MainWindow(QMainWindow):
     def loadLibrary(self):
         """
         Shows the progress dialog, and starts the library loading thread.
+        The data about missing albums with missing covers will be passed via
+        signals from the loadLibraryThread.
         """
         self.PD_Progress.show()
         self.loadLibraryThread.start()
 
     def doneLibraryLoad(self, htAlbums):
+        """
+        This will receive the albums with missing covers (a dictionary)
+        and save them for later use.
+        It will also hide the initial loading dialog, and enable the option
+        of selecting an album from the list.
+        """
         self.htAlbums = htAlbums
+        self.PD_Progress.reset()
         QtCore.QObject.connect(self.List_Albums, QtCore.SIGNAL("currentItemChanged(QListWidgetItem*,QListWidgetItem*)"), self.handleAlbumSelection)
         self.List_Albums.setCurrentRow(0)
 
-    def progressDialogSetup(self, maximum):
+    def progressDialogSetup(self, maximum, title, label):
+        self.PD_Progress.reset()
         self.PD_Progress.setMaximum(maximum)
+        self.PD_Progress.setWindowTitle(title)   
+        self.PD_Progress.setLabelText(label)
         self.PD_Progress.setValue(0)
 
-    def updateProgressDialog(self):
-        self.PD_Progress.setValue(self.PD_Progress.value() + 1)
+    def updateProgressDialog(self, step):
+        self.PD_Progress.setValue(self.PD_Progress.value() + step)
 
     def insertAlbum(self,artist, album):
         newItem = pyCover_QListWidgetItem(artist, album)
@@ -238,9 +251,7 @@ class MainWindow(QMainWindow):
         self.cd = CoverDownload(selectedItem.getArtist(), selectedItem.getAlbum())
         QtCore.QObject.connect(self.cd, QtCore.SIGNAL("doneCoverDownload()"), self.handleDoneCoverDownload)
         QtCore.QObject.connect(self.cd, QtCore.SIGNAL("coverDownloaded(PyQt_PyObject)"), self.handleCoverDownloaded)
-        self.progressDialogSetup(100)
-        self.PD_Progress.setLabelText("Downloading covers...")
-        self.PD_Progress.setWindowTitle("Please wait...")        
+        self.progressDialogSetup(100,"Please wait...","Downloading covers...")
         self.PD_Progress.show()
         self.cd.getCovers()
 
@@ -257,9 +268,7 @@ class MainWindow(QMainWindow):
         selectedItem.appendCover(self.List_Artwork,cover)
 
     def handleSaveCoverClick(self):
-        infoDialog = QMessageBox(QMessageBox.Information,"Information:",\
-            "Cover successfully saved to tracks.",QMessageBox.Ok,\
-            self.mainWidget)
+        # TODO: This should happen in a different thread
         currentAlbum = self.List_Albums.currentItem()
         coverToSave = currentAlbum.covers[self.List_Artwork.currentRow()-1]
         pixmap = QPixmap()
@@ -279,9 +288,14 @@ class MainWindow(QMainWindow):
             trackRef = iTunes.LibraryPlaylist.Tracks.ItemByPersistentID(track[2],track[3])
             trackRef.AddArtworkFromFile(tempFileName)
 
+        os.remove(tempFileName)
         currentAlbum.setIcon(QIcon(pixmap))
 
+        infoDialog = QMessageBox(QMessageBox.Information,"Information:",\
+            "Cover successfully saved to tracks.",QMessageBox.Ok,\
+            self.mainWidget)
         infoDialog.show()
+
 
 if __name__ == "__main__":
     import sys
