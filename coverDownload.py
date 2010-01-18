@@ -1,4 +1,5 @@
 import urllib2
+import urllib
 from BeautifulSoup import BeautifulSoup
 import re
 from PyQt4 import QtCore
@@ -7,9 +8,9 @@ from subCoverDownload import SubCoverDownload
 class CoverDownload(QtCore.QThread):
     def __init__(self,artist,album):
         QtCore.QThread.__init__(self)
-        self.artist = artist.encode("utf-8")
-        self.album = album.encode("utf-8")
-        search = self.artist.replace(' ', '+') + '+' + self.album.replace(' ','+')
+        self.artist = artist
+        self.album = album
+        search = urllib.quote(self.artist.encode("iso-8859-1")).replace('%20', '+') + '+' + urllib.quote(self.album.encode("iso-8859-1")).replace('%20','+')
         self.searchPage = "http://www.amazon.com/s/ref=nb_ss_m?url=search-alias%3Dpopular&field-keywords=" + search + "&x=0&y=0"
         self.covers = []
 

@@ -9,17 +9,23 @@ class pyCover_QListWidgetItem(QListWidgetItem):
     associate this item with List_Artwork.
     """
     def __init__(self, artist, album):
-        QListWidgetItem.__init__(self,QIcon(QPixmap('resources/icon_unknown_cover_100.png')),"{0} - {1}".format(artist.encode("utf-8"), album.encode("utf-8")))
+        QListWidgetItem.__init__(self,QIcon(QPixmap('resources/icon_unknown_cover_100.png')),"{0} - {1}".format(artist.encode("iso-8859-1"), album.encode("iso-8859-1")))
         self.artist = artist
         self.album = album
         self.covers = []
         self.coversDownloaded = False
 
     def getArtist(self):
-        return self.artist.encode("utf-8")
+        return self.artist
+
+    def getUnicodeArtist(self):
+        return self.artist.encode("iso-8859-1")
 
     def getAlbum(self):
-        return self.album.encode("utf-8")
+        return self.album
+
+    def getUnicodeAlbum(self):
+        return self.album.encode("iso-8859-1")
 
     def showArtwork(self, artworkList):
         artworkList.clear()
@@ -37,8 +43,8 @@ class pyCover_QListWidgetItem(QListWidgetItem):
 
     def showInformation(self, infoBox, albumTrackList):
         infoBox.setVisible(True)
-        infoBox.findChild(QLabel,"Lbl_Artist").setText("Artist: {0}".format(self.getArtist()))
-        infoBox.findChild(QLabel,"Lbl_Album").setText("Album: {0}".format(self.getAlbum()))
+        infoBox.findChild(QLabel,"Lbl_Artist").setText("Artist: {0}".format(self.getUnicodeArtist()))
+        infoBox.findChild(QLabel,"Lbl_Album").setText("Album: {0}".format(self.getUnicodeAlbum()))
         trackListBox = infoBox.findChild(QTreeWidget,"T_TrackList")
         trackListBox.clear()
         albumTrackList2 = albumTrackList[2:]

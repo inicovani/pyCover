@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from PyQt4.QtGui import *
-#from PyQt4.QtCore import *
 from PyQt4 import QtCore
 from PyQt4.Qt import *
 from loadiTunesLibrary import LoadiTunesLibrary
@@ -36,7 +35,7 @@ class MainWindow(QMainWindow):
         gl = QVBoxLayout(self.GB_AlbumList)
         
         self.List_Albums = QListWidget(self.GB_AlbumList)
-        self.List_Albums.setIconSize(QSize(100,100))
+        self.List_Albums.setIconSize(QSize(75,75))
         self.List_Albums.setSpacing(2)
         self.List_Albums.setSortingEnabled(True)
 
@@ -123,9 +122,6 @@ class MainWindow(QMainWindow):
         font = QFont()
         font.setWeight(75)
         font.setBold(True)
-#        self.List_Albums.setPalette(palette)
-#        self.List_Albums.setFont(font)
-
 
         gl.addWidget(self.List_Albums)
         self.GB_AlbumList.setLayout(gl)
