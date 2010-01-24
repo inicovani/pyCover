@@ -1,6 +1,8 @@
 from PyQt4.QtGui import *
 from coverDownload import CoverDownload
 from PyQt4 import QtCore
+from PIL import Image
+from StringIO import StringIO
 
 class pyCover_QListWidgetItem(QListWidgetItem):
     """
@@ -35,9 +37,12 @@ class pyCover_QListWidgetItem(QListWidgetItem):
             pm.loadFromData(cover)
             artworkList.addItem(QListWidgetItem(QIcon(pm),''))
 
-    def appendCover(self, artworkList, cover):
+    def appendCover(self, artworkList, cover):        
+        imgCover = Image.open(StringIO(cover))
+        toPNG = StringIO()
+        imgCover.save(toPNG, format='png')
         pm = QPixmap()
-        pm.loadFromData(cover)
+        pm.loadFromData(toPNG.getvalue())
         artworkList.addItem(QListWidgetItem(QIcon(pm),''))
         self.covers.append(cover)
 

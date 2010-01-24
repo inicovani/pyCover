@@ -8,9 +8,11 @@ and download the required cover, so you can automatically save it to
 your album.
 
 REQUIREMENTS
-	This program requires Python 2.6, BeautifulSoup, pywin32 and PyQt4
+    This program requires Python 2.6, BeautifulSoup, pywin32,
+    PIL (Python Imaging Library) and PyQt4
 
-	Python 2.6.4: http://www.python.org
-	BeautifulSoup-3.0.8: http://www.crummy.com/software/BeautifulSoup/
-	pywin32-214: http://sourceforge.net/projects/pywin32/
-	PyQt 4.6.2-2: http://www.riverbankcomputing.co.uk
+           Python 2.6.4:   http://www.python.org
+    BeautifulSoup-3.0.8:   http://www.crummy.com/software/BeautifulSoup/
+            pywin32-214:   http://sourceforge.net/projects/pywin32/
+              PIL 1.1.6:   http://www.pythonware.com/products/pil/
+           PyQt 4.6.2-2:   http://www.riverbankcomputing.co.uk

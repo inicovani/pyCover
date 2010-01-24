@@ -1,6 +1,6 @@
 from PyQt4 import QtCore
-import win32com.client
 import pythoncom
+from win32com.client import Dispatch
 
 class LoadiTunesLibrary(QtCore.QThread):
     def __init__(self, parent):
@@ -9,7 +9,7 @@ class LoadiTunesLibrary(QtCore.QThread):
 
     def run(self):
         pythoncom.CoInitialize()
-        iTunes = win32com.client.gencache.EnsureDispatch("iTunes.Application")
+        iTunes = Dispatch("iTunes.Application")
         tracks = iTunes.LibraryPlaylist.Tracks
 
         self.emit(QtCore.SIGNAL("setMaxTracks(PyQt_PyObject)"), tracks.Count)

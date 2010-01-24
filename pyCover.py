@@ -6,9 +6,12 @@ from PyQt4.Qt import *
 from loadiTunesLibrary import LoadiTunesLibrary
 from pyCover_QListWidgetItem import pyCover_QListWidgetItem
 from coverDownload import CoverDownload
-import win32com.client
+from saveCoverToTracks import SaveCoverToTracks
+from win32com.client import Dispatch
 import pythoncom
 import os
+from PIL import Image
+from StringIO import StringIO
 
 class MainWindow(QMainWindow):
     def __init__(self, *args):
@@ -237,12 +240,21 @@ class MainWindow(QMainWindow):
             self.GB_Options.findChild(QPushButton,"Btn_SaveCoverToAlbum").setVisible(False)
 
     def handleCoverSelection(self, itemSelected, previousItemSelected):
+        """
+        This handles the selection of a cover.
+        If 'None' cover selected, disable the 'Save Cover' button.
+        """
         if self.List_Artwork.currentRow() > 0:
             self.GB_Options.findChild(QPushButton,"Btn_SaveCoverToAlbum").setDisabled(False)
         else:
             self.GB_Options.findChild(QPushButton,"Btn_SaveCoverToAlbum").setDisabled(True)
 
     def handleDownloadCoverClick(self):
+        """
+        This handles the click of the 'Download Cover' button.
+        It starts the thread in charge of downloading covers,
+        and connects the signals for information display.
+        """
         selectedItem = self.List_Albums.selectedItems()[0]
         self.cd = CoverDownload(selectedItem.getArtist(), selectedItem.getAlbum())
         QtCore.QObject.connect(self.cd, QtCore.SIGNAL("doneCoverDownload()"), self.handleDoneCoverDownload)
@@ -264,27 +276,35 @@ class MainWindow(QMainWindow):
         selectedItem.appendCover(self.List_Artwork,cover)
 
     def handleSaveCoverClick(self):
-        # TODO: This should happen in a different thread
+        """
+        This handles the click of the 'Save Cover' button.
+        Since Qt doesn't natively support JPEG images,
+        pyCover now used PIL to save them to PNG before using
+        any image with Qt
+        """
         currentAlbum = self.List_Albums.currentItem()
-        coverToSave = currentAlbum.covers[self.List_Artwork.currentRow()-1]
-        pixmap = QPixmap()
-        pixmap.loadFromData(coverToSave)
-
-        tempFileName = "pyCover_tempcover.jpg"
-        fp = open(tempFileName,"wb")
-        fp.write(coverToSave)
-        fp.flush()
-        os.fsync(fp.fileno())
-        fp.close()
+        tempFileName = "C:\pyCover_tempcover.png"
         
-        trackList = self.htAlbums[currentAlbum.album][2:]
-        iTunes = win32com.client.gencache.EnsureDispatch("iTunes.Application")
+        imgCover = Image.open(StringIO(currentAlbum.covers[self.List_Artwork.currentRow()-1]))
+        imgCover.save(tempFileName, format='png')
+        
+        pixmap = QPixmap()
+        pixmap.load(tempFileName,'png')
 
-        for track in trackList:
-            trackRef = iTunes.LibraryPlaylist.Tracks.ItemByPersistentID(track[2],track[3])
-            trackRef.AddArtworkFromFile(tempFileName)
+        trackList = self.htAlbums[currentAlbum.album][2:]
+        
+        self.saveCoverThread = SaveCoverToTracks(self,tempFileName,trackList)
+        self.saveCoverThread.start()
+        
+        while True:
+            running = False
+            if self.saveCoverThread.isRunning():
+                running = True
+            if not running: break
+            else: QtCore.QThread.sleep(1)
 
         os.remove(tempFileName)
+
         currentAlbum.setIcon(QIcon(pixmap))
 
         infoDialog = QMessageBox(QMessageBox.Information,"Information:",\
